@@ -98,7 +98,7 @@ class InputRecorder:
             return
             
         try:
-            from pynput.mouse import Listener
+            from pynput.mouse import Listener  # noqa: F401
             controller = self.mouse_controller
             current_pos = controller.position
             if self.last_mouse_pos != current_pos:
@@ -133,7 +133,7 @@ class InputRecorder:
                     button_name = f"button_{button.value}"
                 else:
                     button_name = str(button)
-            except:
+            except:  # noqa: E722
                 button_name = "unknown"
         
         action_type = "mouse_down" if pressed else "mouse_up"
@@ -361,7 +361,7 @@ class InputRecorder:
                     Logger.info(f"  {i}. {file}")
                 if len(existing_files) > 5:
                     Logger.info(f"  ... and {len(existing_files) - 5} more")
-        except:
+        except:  # noqa: E722
             pass
         Logger.info(f"\nDefault filename includes date and time: {default_filename}")
         custom_file = input(f"Enter output file name (default: {default_filename}): ").strip()
