@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61,<70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "macro-gen"
+version = "0.1.0"
+description = "A tool to record and replay mouse and keyboard actions"
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [
+    { name = "Ali Terro", email = "aliterr588@gmail.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.6"
+
+dependencies = [
+    "pynput>=1.7.0",
+    "configparser>=5.0.0"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/0xTristo/macro-gen"
+
+[project.scripts]
+macro-gen = "macro_gen.main:main"
+macro-gen-install = "macro_gen.install_config:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+macro_gen = ["macro_gen.conf"]
+
+[tool.setuptools.data-files]
+"share/man/man8" = ["macro-gen.8"]
