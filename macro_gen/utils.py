@@ -83,7 +83,7 @@ def get_mouse_button(button_name):
             if button_name.startswith("button_"):
                 return Button.x1 if "4" in button_name else Button.x2
             return Button.left
-        except:
+        except:  # noqa: E722
             return Button.left
 
 def get_keyboard_key(key_name):

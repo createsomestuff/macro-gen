@@ -1,16 +1,14 @@
 import json
 import time
 import threading
-import argparse
 from datetime import datetime
 import os
-import pkg_resources
 from pynput import mouse, keyboard
 from pynput.mouse import Button
-from .utils import get_mouse_button, Logger, get_config_dir, get_data_dir
+from .utils import Logger, get_data_dir, get_keyboard_key
 
 class InputRecorder:
-    def __init__(self, mouse_tracking_period=0.1, output_file=None, history_dir=None):
+    def __init__(self, mouse_tracking_period=0.1, output_file=None, history_dir=None, config=None):
         self.mouse_tracking_period = mouse_tracking_period
         
         if history_dir:
@@ -35,6 +33,16 @@ class InputRecorder:
                 self.output_file = os.path.join(self.history_dir, output_file)
             else:
                 self.output_file = output_file
+
+        self.exit_key_str = "ESC"
+        self.exit_key = keyboard.Key.esc
+        if config is not None:
+            if 'exit_program_key' in config.keys():
+                self.exit_key_str = config['exit_program_key']
+                Logger.info(f"Overwriting exit program key from ESC to {self.exit_key_str}")
+
+                self.exit_key = get_keyboard_key(self.exit_key_str)
+
         
         self.actions = []
         self.start_time = None
@@ -53,10 +61,10 @@ class InputRecorder:
         self.control_listener = None
         
         self.mouse_controller = mouse.Controller()
-        Logger.info(f"Input Recorder initialized:")
-        Logger.info(f"- Mouse tracking period: {mouse_tracking_period}s")
+        Logger.info("Input Recorder initialized:")
+        Logger.info(f"- Mouse tracking period: {mouse_tracking_period}s = {mouse_tracking_period*100} ms")
         Logger.info(f"- Output file: {self.output_file}")
-        print("Press F9 to start/stop recording, F8 to pause/resume, ESC to quit")
+        print(f"Press F9 to start/stop recording, F8 to pause/resume, {self.exit_key_str} to quit")
     
     def get_current_time_ms(self):
         if self.start_time is None:
@@ -182,7 +190,7 @@ class InputRecorder:
                 self.toggle_recording()
             elif key == keyboard.Key.f8:
                 self.toggle_pause()
-            elif key == keyboard.Key.esc:
+            elif key == self.exit_key:
                 Logger.info("\nExiting...")
                 self.stop_recording()
                 return False
@@ -325,7 +333,7 @@ class InputRecorder:
             Logger.info("Controls:")
             Logger.info("- F9: Start/Stop recording")
             Logger.info("- F8: Pause/Resume recording")
-            Logger.info("- ESC: Exit program")
+            Logger.info(f"- {self.exit_key_str}: Exit program")
             Logger.info("After each recording, you'll be prompted for a new filename.")
             Logger.info(f"Current recording will be saved to: {self.output_file}")
             

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 import argparse
-import sys
 import os
 import configparser
 import subprocess
 from datetime import datetime
+from typing import Any
 import pkg_resources
 from .inputrecorder import InputRecorder
 from .actiongenerator import ActionGenerator
 from .utils import get_config_dir, get_data_dir, Logger
 
-def load_config():
+def load_config() -> dict[str, Any]:
     config = {
         "mouse_trps": 50,
         "default_trigger_key": "f10",
@@ -33,6 +33,8 @@ def load_config():
                 if 'recorder' in parser:
                     if 'mouse_trps' in parser['recorder']:
                         config['mouse_trps'] = parser.getint('recorder', 'mouse_trps')
+                    if 'exit_program_key' in parser['recorder']:
+                        config['exit_program_key'] = parser['recorder']['exit_program_key']
                 
                 if 'playback' in parser:
                     if 'default_trigger_key' in parser['playback']:
@@ -60,12 +62,13 @@ def load_config():
     
     return config
 
-def record_command(args, config):
+def record_command(args, config: dict[str, Any]):
     mouse_tracking_period = 1 / config['mouse_trps']
     
     recorder = InputRecorder(
         mouse_tracking_period=mouse_tracking_period,
-        history_dir=config['history_dir']
+        history_dir=config['history_dir'],
+        config=config
     )
     recorder.run()
 
@@ -109,7 +112,7 @@ def list_history_command(args, config):
             with open(file_path, 'r') as f:
                 data = json.load(f)
                 action_count = str(len(data.get('actions', [])))
-        except:
+        except:  # noqa: E722
             pass
             
         print(f"{i:<4} {file:<40} {file_size:.1f} KB   {mod_time:<20} {action_count:<10}")
@@ -151,7 +154,7 @@ def list_macros_command(args, config):
                         macro_type = "Single Execution"
                     elif "LoopExecution" in content:
                         macro_type = "Loop Execution"
-            except:
+            except:  # noqa: E722
                 pass
             
         print(f"{i:<4} {file:<40} {file_size:.1f} KB   {mod_time:<20} {macro_type:<15}")
@@ -177,14 +180,14 @@ def run_command(args, config):
                 macro_path = os.path.join(macros_dir, matches[0])
                 Logger.info(f"Found matching macro: {matches[0]}")
             else:
-                Logger.error(f"Multiple matching macros found:")
+                Logger.error("Multiple matching macros found:")
                 for match in matches:
                     Logger.info(f"  - {match}")
-                Logger.info(f"Please specify the exact name.")
+                Logger.info("Please specify the exact name.")
                 return
         else:
             Logger.error(f"Macro file not found: {macro_name}")
-            Logger.info(f"Use 'macro-gen list-macros' to see available macros.")
+            Logger.info("Use 'macro-gen list-macros' to see available macros.")
             return
 
     Logger.info(f"Running macro: {os.path.basename(macro_path)}")
@@ -278,14 +281,14 @@ def main():
     parser = argparse.ArgumentParser(description='Record and replay mouse and keyboard actions')
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
-    record_parser = subparsers.add_parser('record', help='Record mouse and keyboard actions')
+    record_parser = subparsers.add_parser('record', help='Record mouse and keyboard actions')  # noqa: F841
 
     generate_parser = subparsers.add_parser('generate', help='Generate replay script from a recording')
     generate_parser.add_argument('file', nargs='?', help='Input JSON file with recorded actions')
 
-    list_history_parser = subparsers.add_parser('list-history', help='List all recordings in history directory')
+    list_history_parser = subparsers.add_parser('list-history', help='List all recordings in history directory')  # noqa: F841
 
-    list_macros_parser = subparsers.add_parser('list-macros', help='List all macros in macros directory')
+    list_macros_parser = subparsers.add_parser('list-macros', help='List all macros in macros directory')  # noqa: F841
 
     run_parser = subparsers.add_parser('run', help='Run a macro from the macros directory')
     run_parser.add_argument('macro', help='Name of the macro to run')
